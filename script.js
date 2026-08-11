@@ -3,19 +3,18 @@ gsap.registerPlugin(ScrollTrigger);
 let mm = gsap.matchMedia();
 
 mm.add("(prefers-reduced-motion: no-preference)", () => {
-  gsap.utils.toArray('.reveal').forEach((el, i) => {
-    gsap.to(el, {
-      opacity: 1,
-      y: 0,
-      duration: 0.9,
-      ease: 'power3.out',
-      delay: (i % 5) * 0.06,
-      scrollTrigger: {
-        trigger: el,
-        start: 'top 88%',
-        toggleActions: 'play none none none'
-      }
-    });
+  ScrollTrigger.batch('.reveal', {
+    start: 'top 88%',
+    once: true,
+    onEnter: (elements) => {
+      gsap.to(elements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        stagger: 0.08
+      });
+    }
   });
 
   gsap.to('.hero__frame .thumb img', {
@@ -27,6 +26,23 @@ mm.add("(prefers-reduced-motion: no-preference)", () => {
       end: 'bottom top',
       scrub: true
     }
+  });
+
+  // Floaty idle motion on a couple of accent elements only
+  gsap.to('.hero__badge', {
+    y: -10,
+    duration: 2.6,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1
+  });
+  gsap.to('.hero__stat', {
+    y: 8,
+    duration: 3,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1,
+    delay: 0.3
   });
 });
 
@@ -54,3 +70,24 @@ document.querySelectorAll('.faq__item').forEach((item) => {
     }
   });
 });
+
+// Magnetic hover on primary buttons
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  document.querySelectorAll('.btn--primary').forEach((btn) => {
+    const xTo = gsap.quickTo(btn, 'x', { duration: 0.5, ease: 'power3.out' });
+    const yTo = gsap.quickTo(btn, 'y', { duration: 0.5, ease: 'power3.out' });
+
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const relX = e.clientX - rect.left - rect.width / 2;
+      const relY = e.clientY - rect.top - rect.height / 2;
+      xTo(relX * 0.35);
+      yTo(relY * 0.5);
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      xTo(0);
+      yTo(0);
+    });
+  });
+}
